@@ -71,7 +71,9 @@
                   </mat-form-field>
             </p>
           <button type="submit" mat-button class="background-primary text-floral-white" [disabled]="commentForm.invalid">Submit</button>
-        </form>
-        
-      
+        </form>    
 </div>
+<div *ngIf="errMess">
+    <h2>Error</h2>
+    <h4>{{errMess}}</h4>
+  </div>
