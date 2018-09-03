@@ -19,6 +19,7 @@ export class DishdetailComponent implements OnInit {
     @ViewChild('ffform') commentFormDirective;
     
     dish: Dish;
+    dishcopy = null;
     dishIds: number[];
     prev: number;
     next: number;
@@ -44,15 +45,17 @@ export class DishdetailComponent implements OnInit {
         private route: ActivatedRoute,
         private location: Location,
         private fbl: FormBuilder,
-        @Inject('BaseURL') private BaseURL) {
-            this.createForm();
-         }
+        @Inject('BaseURL') private BaseURL) {}
+         
 
     ngOnInit() {
+
+        this.createForm(); 
+
         this.dishservice.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
         this.route.params.pipe(switchMap((params: Params) => this.dishservice.getDish(+params['id'])))
-        .subscribe(dish => { this.dish = dish; this.setPrevNext(dish.id);},
-        errmess => this.errMess = <any>errmess);
+        .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); },
+          errmess => { this.dish = null; this.errMess = <any>errmess; });
     }
         
     setPrevNext(dishId: number) {
@@ -104,6 +107,9 @@ export class DishdetailComponent implements OnInit {
         this.comment = this.commentForm.value;
         this.comment.date = new Date().toISOString();
         console.log(this.comment);
+        this.dishcopy.comments.push(this.comment);
+        this.dishcopy.save()
+          .subscribe(dish => { this.dish = dish; console.log(this.dish); });
         this.dish.comments.push(this.comment);
         this.commentFormDirective.resetForm({
           author: '',
