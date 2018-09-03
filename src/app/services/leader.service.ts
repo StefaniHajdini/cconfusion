@@ -5,26 +5,32 @@ import { delay, map, catchError, mergeMap, tap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { baseURL } from '../shared/baseurl';
 import { ProcessHTTPMsgService } from './process-httpmsg.service';
+import { Restangular } from 'ngx-restangular';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LeaderService {
 
-  constructor(private http: HttpClient,
-    private processHTTPMsgService: ProcessHTTPMsgService,
-    @Inject('BaseURL') private BaseURL) { }
+  constructor(private restangular: Restangular) { }
 
-    getLeaders(): Observable<Leader[]> {
-      return this.http.get<Leader[]>(baseURL + 'leaders');
-    }
-  
-    getLeader(id: number): Observable<Leader> {
-      return this.http.get<Leader>(baseURL + 'leaders/' + id);
-    }
-  
-    getFeaturedLeader(): Observable<Leader> {
-      return this.http.get<Leader[]>(baseURL + 'leaders?featured=true').pipe(map(leaders => leaders[0]));
-    }
+  getLeaders(): Observable<Leader[]> {
+    return this.restangular.all('leaders').getList();
+  }
+
+  getLeader(id: number): Observable<Leader> {
+    return  this.restangular.one('leaders', id).get();
+  }
+
+  getFeaturedLeader(): Observable<Leader> {
+    return this.restangular.all('leaders').getList({featured: true})
+      .pipe(map(leaders => leaders[0]));
+  }
+
+  getLeaderIds(): Observable<number[] | any> {
+    return this.getLeaders()
+      .pipe(map(leaders => leaders.map(leader => leader.id)),
+        catchError(error => error ));
+  }
 
 }
